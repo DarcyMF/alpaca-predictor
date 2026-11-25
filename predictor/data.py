@@ -1,7 +1,7 @@
 """Getting daily price bars, either from Alpaca or made up for testing."""
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
@@ -40,9 +40,10 @@ def fetch_alpaca(symbol: str, start: str) -> pd.DataFrame:
     request = StockBarsRequest(
         symbol_or_symbols=symbol.upper(),
         timeframe=TimeFrame.Day,
-        start=datetime.fromisoformat(start),
-        # the free plan can't ask for the last 15 minutes of data
-        end=datetime.now() - timedelta(minutes=20),
+        start=datetime.fromisoformat(start).replace(tzinfo=timezone.utc),
+        # The free plan can't ask for the last 15 minutes of data. Has to be UTC: a plain
+        # datetime.now() is local time, which Alpaca reads as UTC (10 hours ahead in Brisbane).
+        end=datetime.now(timezone.utc) - timedelta(minutes=20),
         # adjust for splits and dividends, otherwise a split looks like a crash
         adjustment=Adjustment.ALL,
     )
