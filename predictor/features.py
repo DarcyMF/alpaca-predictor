@@ -48,9 +48,10 @@ def add_features(bars: pd.DataFrame) -> pd.DataFrame:
     df["macd_hist"] = macd_histogram(close) / close
     vol_mean = df["volume"].rolling(20).mean()
     vol_std = df["volume"].rolling(20).std()
-    df["volume_z"] = (df["volume"] - vol_mean) / vol_std.replace(0, np.nan)
+    # if volume hasn't changed at all for 20 days, call it normal (0) instead of dividing by zero
+    df["volume_z"] = ((df["volume"] - vol_mean) / vol_std.replace(0, np.nan)).mask(vol_std == 0, 0.0)
     df["range"] = (df["high"] - df["low"]) / close
-    df["day_of_week"] = df.index.dayofweek
+    df["day_of_week"] = df.index.day_of_week
     return df
 
 
