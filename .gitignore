@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+
+# API keys live here, never commit it
+.env
+
+# downloaded price data
+data/
