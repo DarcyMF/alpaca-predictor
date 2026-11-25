@@ -35,9 +35,28 @@ python -m predictor backtest --demo
 
 All about 50%, all worse than just holding. That's the right answer. The same model does find a pattern when one really exists (see `test_model_learns_a_real_pattern`), so it's not just broken.
 
-## Results on real data
+## Results on real data: SPY (S&P 500 fund)
 
-Run `python -m predictor backtest SPY` with your keys set up and it saves `reports/spy.png` and `reports/spy.md`.
+Daily bars from Alpaca, March 2016 to November 2026. The first three years are only used for training, so the test covers March 2019 to November 2026 (1,940 trading days), including the 2020 crash and the 2022 bear market. Costs are 0.05% per trade.
+
+![SPY backtest](reports/spy.png)
+
+| strategy     | accuracy | total return | per year | sharpe | max drawdown | time in market | trades |
+|:-------------|---------:|-------------:|---------:|-------:|-------------:|---------------:|-------:|
+| momentum     |     49.7 |        -21.3 |     -3.1 |  -0.18 |        -35.9 |           54.9 |    975 |
+| logistic     |     54.4 |        195.3 |     15.1 |   0.87 |        -27.3 |           92.8 |    224 |
+| boosting     |     51.8 |         30.8 |      3.5 |   0.29 |        -35.3 |           75.1 |    501 |
+| buy_and_hold |     54.9 |        193.5 |     15.0 |   0.83 |        -33.8 |          100.0 |      1 |
+
+**What this says:**
+
+- **No model predicts the next day better than guessing "up" every day.** SPY rose on 54.9% of days. The best model was right 54.4% of the time.
+- **Logistic regression roughly matched buy and hold** (15.1% a year vs 15.0%) with a smaller worst drop (-27% vs -34%). That's mostly because it learned to stay invested 93% of the time and sat out some of the 2020 crash. The gap is small enough to be luck, and one period isn't proof.
+- **Gradient boosting and momentum did much worse** than doing nothing. They trade more, pay more costs, and miss big up days.
+
+So the honest conclusion is the one most research reaches: daily price patterns in a big index fund are close to unpredictable, and a simple model's best move is to stay invested. What the project shows is a backtest you can trust: walk-forward training, costs, baselines, and tests that catch look-ahead bias.
+
+To run it on another symbol: `python -m predictor backtest QQQ`.
 
 ## Setup
 
